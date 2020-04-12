@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.taolun.mapper.TaoluUserMapper">
+
+  <resultMap type="TaoluUser" id="TaoluUserResult">
+    <result property="id" column="id"/>
+    <result property="taolunId" column="taolun_id"/>
+    <result property="shoucangUserId" column="shoucang_user_id"/>
+    <result property="shoucangUserName" column="shoucang_user_name"/>
+    <result property="dianzanUserId" column="dianzan_user_id"/>
+    <result property="dianzanUserName" column="dianzan_user_name"/>
+    <result property="pinglunUserId" column="pinglun_user_id"/>
+    <result property="pinglunUserName" column="pinglun_user_name"/>
+    <result property="pinglunContent" column="pinglun_content"/>
+    <result property="createTime" column="create_time"/>
+  </resultMap>
+
+  <sql id="selectTaoluUserVo">
+        select id, taolun_id, shoucang_user_id, shoucang_user_name, dianzan_user_id, dianzan_user_name, pinglun_user_id, pinglun_user_name, pinglun_content, create_time from taolu_user
+    </sql>
+
+  <select id="selectTaoluUserList" parameterType="TaoluUser" resultMap="TaoluUserResult">
+    <include refid="selectTaoluUserVo"/>
+    <where>
+      <if test="taolunId != null ">and taolun_id = #{taolunId}</if>
+      <if test="shoucangUserId != null ">and shoucang_user_id = #{shoucangUserId}</if>
+      <if test="shoucangUserName != null  and shoucangUserName != ''">and shoucang_user_name like concat('%',
+        #{shoucangUserName}, '%')
+      </if>
+      <if test="dianzanUserId != null ">and dianzan_user_id = #{dianzanUserId}</if>
+      <if test="dianzanUserName != null  and dianzanUserName != ''">and dianzan_user_name like concat('%',
+        #{dianzanUserName}, '%')
+      </if>
+      <if test="pinglunUserId != null ">and pinglun_user_id = #{pinglunUserId}</if>
+      <if test="pinglunUserName != null  and pinglunUserName != ''">and pinglun_user_name like concat('%',
+        #{pinglunUserName}, '%')
+      </if>
+      <if test="pinglunContent != null  and pinglunContent != ''">and pinglun_content = #{pinglunContent}</if>
+    </where>
+  </select>
+
+  <select id="selectTaoluUserById" parameterType="Long" resultMap="TaoluUserResult">
+    <include refid="selectTaoluUserVo"/>
+    where id = #{id}
+  </select>
+
+  <insert id="insertTaoluUser" parameterType="TaoluUser" useGeneratedKeys="true" keyProperty="id">
+    insert into taolu_user
+    <trim prefix="(" suffix=")" suffixOverrides=",">
+      <if test="taolunId != null ">taolun_id,</if>
+      <if test="shoucangUserId != null ">shoucang_user_id,</if>
+      <if test="shoucangUserName != null  and shoucangUserName != ''">shoucang_user_name,</if>
+      <if test="dianzanUserId != null ">dianzan_user_id,</if>
+      <if test="dianzanUserName != null  and dianzanUserName != ''">dianzan_user_name,</if>
+      <if test="pinglunUserId != null ">pinglun_user_id,</if>
+      <if test="pinglunUserName != null  and pinglunUserName != ''">pinglun_user_name,</if>
+      <if test="pinglunContent != null  and pinglunContent != ''">pinglun_content,</if>
+      <if test="createTime != null ">create_time,</if>
+    </trim>
+    <trim prefix="values (" suffix=")" suffixOverrides=",">
+      <if test="taolunId != null ">#{taolunId},</if>
+      <if test="shoucangUserId != null ">#{shoucangUserId},</if>
+      <if test="shoucangUserName != null  and shoucangUserName != ''">#{shoucangUserName},</if>
+      <if test="dianzanUserId != null ">#{dianzanUserId},</if>
+      <if test="dianzanUserName != null  and dianzanUserName != ''">#{dianzanUserName},</if>
+      <if test="pinglunUserId != null ">#{pinglunUserId},</if>
+      <if test="pinglunUserName != null  and pinglunUserName != ''">#{pinglunUserName},</if>
+      <if test="pinglunContent != null  and pinglunContent != ''">#{pinglunContent},</if>
+      <if test="createTime != null ">#{createTime},</if>
+    </trim>
+  </insert>
+
+  <update id="updateTaoluUser" parameterType="TaoluUser">
+    update taolu_user
+    <trim prefix="SET" suffixOverrides=",">
+      <if test="taolunId != null ">taolun_id = #{taolunId},</if>
+      <if test="shoucangUserId != null ">shoucang_user_id = #{shoucangUserId},</if>
+      <if test="shoucangUserName != null  and shoucangUserName != ''">shoucang_user_name = #{shoucangUserName},</if>
+      <if test="dianzanUserId != null ">dianzan_user_id = #{dianzanUserId},</if>
+      <if test="dianzanUserName != null  and dianzanUserName != ''">dianzan_user_name = #{dianzanUserName},</if>
+      <if test="pinglunUserId != null ">pinglun_user_id = #{pinglunUserId},</if>
+      <if test="pinglunUserName != null  and pinglunUserName != ''">pinglun_user_name = #{pinglunUserName},</if>
+      <if test="pinglunContent != null  and pinglunContent != ''">pinglun_content = #{pinglunContent},</if>
+      <if test="createTime != null ">create_time = #{createTime},</if>
+    </trim>
+    where id = #{id}
+  </update>
+
+  <delete id="deleteTaoluUserById" parameterType="Long">
+        delete from taolu_user where id = #{id}
+    </delete>
+
+  <delete id="deleteTaoluUserByIds" parameterType="String">
+    delete from taolu_user where id in
+    <foreach item="id" collection="array" open="(" separator="," close=")">
+      #{id}
+    </foreach>
+  </delete>
+
+  <!--    查找评论列表-->
+  <select id="SelectPinglunList" parameterType="Long" resultMap="TaoluUserResult">
+        select * from taolu_user  where taolun_id = #{id} and  pinglun_user_name !="" and pinglun_content!=""
+  </select>
+    <!--    查找点赞数目-->
+  <select id="SelectDianzanList" parameterType="Long" resultType="java.lang.Integer">
+        select count(dianzan_user_id) as num from taolu_user where taolun_id = #{id}
+  </select>
+    <!--    查找收藏数目-->
+    <select id="SelectShoucangList" parameterType="Long" resultType="java.lang.Integer">
+         select count(shoucang_user_id) as num  from taolu_user where taolun_id = #{id}
+  </select>
+
+  <select id="SelectIsDianzan" parameterType="TaoluUser"  resultMap="TaoluUserResult">
+
+        select  * from taolu_user where taolun_id=#{taolunId} and dianzan_user_id = #{dianzanUserId}
+  </select>
+  <select id="SelectIsShoucang" parameterType="TaoluUser"  resultMap="TaoluUserResult">
+
+        select  * from taolu_user where taolun_id=#{taolunId} and shoucang_user_id = #{shoucangUserId}
+  </select>
+
+
+</mapper>

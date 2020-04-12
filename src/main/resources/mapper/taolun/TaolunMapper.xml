@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.taolun.mapper.TaolunMapper">
+    
+    <resultMap type="Taolun" id="TaolunResult">
+        <result property="id"    column="id"    />
+        <result property="title"    column="title"    />
+        <result property="createTime"    column="create_time"    />
+        <result property="createBy"    column="create_by"    />
+        <result property="state"    column="state"    />
+        <result property="shoucang"    column="shoucang"    />
+        <result property="dianzan"    column="dianzan"    />
+        <result property="redu"    column="redu"    />
+        <result property="content"    column="content"    />
+    </resultMap>
+
+    <sql id="selectTaolunVo">
+        select id, title, create_time, create_by, state, shoucang, dianzan, redu, content from taolun
+    </sql>
+
+    <select id="selectTaolunList" parameterType="Taolun" resultMap="TaolunResult">
+        <include refid="selectTaolunVo"/>
+        <where>  
+            <if test="title != null  and title != ''"> and title = #{title}</if>
+            <if test="createTime != null "> and create_time = #{createTime}</if>
+            <if test="state != null "> and state = #{state}</if>
+        </where>
+    </select>
+    
+    <select id="selectTaolunById" parameterType="Long" resultMap="TaolunResult">
+        <include refid="selectTaolunVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertTaolun" parameterType="Taolun">
+        insert into taolun
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="id != null ">id,</if>
+            <if test="title != null  and title != ''">title,</if>
+            <if test="createTime != null ">create_time,</if>
+            <if test="createBy != null ">create_by,</if>
+            <if test="state != null  and state != ''">state,</if>
+            <if test="shoucang != null ">shoucang,</if>
+            <if test="dianzan != null ">dianzan,</if>
+            <if test="redu != null ">redu,</if>
+            <if test="content != null  and content != ''">content,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="id != null ">#{id},</if>
+            <if test="title != null  and title != ''">#{title},</if>
+            <if test="createTime != null ">#{createTime},</if>
+            <if test="createBy != null  and createBy != ''">#{createBy},</if>
+            <if test="state != null  and state != ''">#{state},</if>
+            <if test="shoucang != null ">#{shoucang},</if>
+            <if test="dianzan != null ">#{dianzan},</if>
+            <if test="redu != null ">#{redu},</if>
+            <if test="content != null  and content != ''">#{content},</if>
+         </trim>
+    </insert>
+
+    <update id="updateTaolun" parameterType="Taolun">
+        update taolun
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="title != null  and title != ''">title = #{title},</if>
+            <if test="createTime != null ">create_time = #{createTime},</if>
+            <if test="createBy != null  and createBy != ''">create_by = #{createBy},</if>
+            <if test="state != null  and state != ''">state = #{state},</if>
+            <if test="shoucang != null ">shoucang = #{shoucang},</if>
+            <if test="dianzan != null ">dianzan = #{dianzan},</if>
+            <if test="redu != null ">redu = #{redu},</if>
+            <if test="content != null  and content != ''">content = #{content},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteTaolunById" parameterType="Long">
+        delete from taolun where id = #{id}
+    </delete>
+
+    <delete id="deleteTaolunByIds" parameterType="String">
+        delete from taolun where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

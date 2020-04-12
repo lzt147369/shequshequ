@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org" xmlns:shiro="http://www.pollix.at/thymeleaf/shiro">
+<head>
+    <th:block th:include="include :: header('物业服务列表')"/>
+</head>
+<body class="gray-bg">
+<div class="container-div">
+    <div class="row">
+        <div class="col-sm-12 search-collapse">
+            <form id="formId">
+                <div class="select-list">
+                    <ul>
+                        <li>
+                            <label>服务类别：</label>
+                            <select name="type" th:with="type=${@dict.getType('sys_fuwu_type')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>业主姓名：</label>
+                            <input type="text" name="name"/>
+                        </li>
+                        <li>
+                            <label>审核状态：</label>
+                            <select name="shenheState" th:with="type=${@dict.getType('sys_fuwushenhe_state')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>是否缴费：</label>
+                            <select name="jiaofeiState" th:with="type=${@dict.getType('sys_jiaofei_state')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <label>是否处理：</label>
+                            <select name="jiaofeiState" th:with="type=${@dict.getType('sys_chuli_state')}">
+                                <option value="">所有</option>
+                                <option th:each="dict : ${type}" th:text="${dict.dictLabel}"
+                                        th:value="${dict.dictValue}"></option>
+                            </select>
+                        </li>
+                        <li>
+                            <a class="btn btn-primary btn-rounded btn-sm" onclick="$.table.search()"><i
+                                    class="fa fa-search"></i>&nbsp;搜索</a>
+                            <a class="btn btn-warning btn-rounded btn-sm" onclick="$.form.reset()"><i
+                                    class="fa fa-refresh"></i>&nbsp;重置</a>
+                        </li>
+                    </ul>
+                </div>
+            </form>
+        </div>
+
+        <div class="btn-group-sm" id="toolbar" role="group">
+            <a class="btn btn-success" onclick="$.operate.add()" shiro:hasPermission="fuwu:fuwu:add">
+                <i class="fa fa-plus"></i> 添加
+            </a>
+            <a class="btn btn-primary single disabled" onclick="$.operate.edit()" shiro:hasPermission="fuwu:fuwu:edit">
+                <i class="fa fa-edit"></i> 修改
+            </a>
+            <a class="btn btn-danger multiple disabled" onclick="$.operate.removeAll()"
+               shiro:hasPermission="fuwu:fuwu:remove">
+                <i class="fa fa-remove"></i> 删除
+            </a>
+            <!--            <a class="btn btn-warning" onclick="$.table.exportExcel()" shiro:hasPermission="fuwu:fuwu:export">-->
+            <!--                <i class="fa fa-download"></i> 导出-->
+            <!--            </a>-->
+        </div>
+        <div class="col-sm-12 select-table table-striped">
+            <table id="bootstrap-table"></table>
+        </div>
+
+    </div>
+</div>
+<th:block th:include="include :: footer"/>
+<script th:inline="javascript">
+
+
+    var editFlag = [[${@permission.hasPermi('fuwu:fuwu:edit')}]];
+    var removeFlag = [[${@permission.hasPermi('fuwu:fuwu:remove')}]];
+    var shenheFlag = [[${@permission.hasPermi('fuwu:fuwu:shenhe')}]];
+    var jiaofeiFlag = [[${@permission.hasPermi('fuwu:fuwu:jiaofei')}]];
+    var chuliFlag = [[${@permission.hasPermi('fuwu:fuwu:chuli')}]];
+    var pinglunFlag = [[${@permission.hasPermi('fuwu:fuwu:pinglun')}]];
+    var dafenFlag = [[${@permission.hasPermi('fuwu:fuwu:dafen')}]];
+    var yuyueFlag = [[${@permission.hasPermi('fuwu:fuwu:yuyue')}]];
+    var typeDatas = [[${@dict.getType('sys_fuwu_type')}]];
+    var shenheStateDatas = [[${@dict.getType('sys_fuwushenhe_state')}]];
+    var jiaofeiStateDatas = [[${@dict.getType('sys_jiaofei_state')}]];
+    var chuliStateDatas = [[${@dict.getType('sys_chuli_state')}]];
+    var prefix = ctx + "fuwu/fuwu";
+
+    $(function () {
+        var options = {
+            url: prefix + "/list",
+            createUrl: prefix + "/add",
+            updateUrl: prefix + "/edit/{id}",
+            removeUrl: prefix + "/remove",
+            exportUrl: prefix + "/export",
+            modalName: "物业服务",
+            columns: [{
+                checkbox: true
+            },
+                {
+                    field: 'id',
+                    title: 'null',
+                    visible: false
+                },
+                {
+                    field: 'type',
+                    title: '服务类别',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(typeDatas, value);
+                    }
+                },
+                {
+                    field: 'name',
+                    title: '业主姓名'
+                },
+                {
+                    field: 'address',
+                    title: '业主地址'
+                },
+                {
+                    field: 'shenheState',
+                    title: '审核状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(shenheStateDatas, value);
+                    }
+                },
+
+                {
+                    field: 'xingji',
+                    title: '星级'
+                },
+                {
+                    field: 'pinglun',
+                    title: '评论'
+                },
+                {
+                    field: 'feiyong',
+                    title: '费用'
+                },
+                {
+                    field: 'jiaofeiState',
+                    title: '缴费状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(jiaofeiStateDatas, value);
+                    }
+                },
+                {
+                    field: 'chuliState',
+                    title: '处理状态',
+                    formatter: function (value, row, index) {
+                        return $.table.selectDictLabel(chuliStateDatas, value);
+                    }
+                },
+                {
+                    title: '操作',
+                    align: 'center',
+                    formatter: function (value, row, index) {
+                        var actions = [];
+                        // actions.push('<a class="btn btn-success btn-xs ' + editFlag + '" href="javascript:void(0)" onclick="$.operate.edit(\'' + row.id + '\')"><i class="fa fa-edit"></i>编辑</a> ');
+                        actions.push('<a class="btn btn-danger btn-xs ' + removeFlag + '" href="javascript:void(0)" onclick="$.operate.remove(\'' + row.id + '\')"><i class="fa fa-remove"></i>删除</a> ');
+                        actions.push('<a class="btn btn-info btn-xs ' + shenheFlag + '" href="javascript:void(0)" onclick="shenhe1(\'' + row.id + '\')"><i class="fa fa-flag"></i>审核</a> ');
+                        actions.push('<a class="btn btn-success btn-xs ' + jiaofeiFlag + '" href="javascript:void(0)" onclick="jiaofei(\'' + row.id + '\',\'' + row.feiyong + '\')"><i class="fa fa-paypal"></i>缴费</a> ');
+                        actions.push('<a class="btn btn-info btn-xs ' + chuliFlag + '" href="javascript:void(0)" onclick="chuli(\'' + row.id + '\')"><i class="fa fa-check-square"></i>处理</a> ');
+                        // actions.push('<a class="btn btn-primary btn-xs ' + yuyueFlag + '" href="javascript:void(0)" onclick="yuyue(\'' + row.id + '\')"><i class="fa fa-tint"></i>预约</a> ');
+                        actions.push('<a class="btn btn-warning btn-xs ' + dafenFlag + '" href="javascript:void(0)" onclick="dafen(\'' + row.id + '\')"><i class="fa fa-star"></i>打分</a> ');
+                        actions.push('<a class="btn btn-default btn-xs ' + pinglunFlag + '" href="javascript:void(0)" onclick="pinglun(\'' + row.id + '\')"><i class="fa fa-comment"></i>评论</a> ');
+                        return actions.join('');
+                    }
+                }]
+        };
+        $.table.init(options);
+
+    });
+
+    function yuyue(id) {
+        $.modal.confirm("确认要预约吗?", function () {
+            $.modal.alert("预约成功");
+        });
+
+    }
+
+    function dafen(id) {
+
+
+        var btn = ['<i class="fa fa-check"></i> 确定', '<i class="fa fa-close"></i> 取消'];
+        var options = {
+            type: "1",
+            title: "星级打分",
+            width: "500",
+            height: "220",
+            content: "<div class=\"form-group\" id=\"shenheDiv\">" +
+                "                <br>" +
+                "                <label class=\"col-sm-3 control-label\">服务星级：</label>" +
+                "<div class=\"col-sm-11\">" +
+                "                                    <label class=\"radio-box\"><input type=\"radio\" checked=\"\" value=\"1\" id=\"optionsRadios1\" name=\"optionsRadios\">1星</label>" +
+                "                                    <label class=\"radio-box\"><input type=\"radio\" value=\"2\" id=\"optionsRadios2\" name=\"optionsRadios\">2星</label>" +
+                "<label class=\"radio-box\"><input type=\"radio\" value=\"3\" id=\"optionsRadios3\" name=\"optionsRadios\">3星</label>" +
+                "<label class=\"radio-box\"><input type=\"radio\" value=\"4\" id=\"optionsRadios4\" name=\"optionsRadios\">4星</label>" +
+                "<label class=\"radio-box\"><input type=\"radio\" value=\"5\" id=\"optionsRadios5\" name=\"optionsRadios\">5星</label>" +
+                "</div>" +
+                "            </div>",
+            btn: btn,
+
+            yes: function (index, layero) {
+                layer.close(index);
+                var dafen = $("input[type='radio']:checked").val();
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    url: "/fuwu/fuwu/dafen/" + id + "/" + dafen,
+
+                    success: function (res) {
+                        if (!res.state) {
+                            layer.msg("不可重复打分")
+                            return;
+                        }
+                        layer.msg("评论打分成功", {
+                            icon: 2,
+                            time: 500,
+                            shade: [0.1, '#8F8F8F']
+                        }, function () {
+                            location.reload();
+                        });
+
+
+                    }
+                });
+
+
+            }
+        };
+        $.modal.openOptions1(options);
+
+    }
+
+    function pinglun(id) {
+        var btn = ['<i class="fa fa-check"></i> 评论', '<i class="fa fa-close"></i> 取消'];
+        var options = {
+            type: "1",
+            title: "评论",
+            width: "500",
+            height: "220",
+            content: "<div class=\"form-group\" id=\"shenheDiv\">" +
+                "                <br>" +
+                "                <label class=\"col-sm-3 control-label\">评论内容：</label>" +
+                "                <div class=\"col-sm-10\">" +
+                "                    <input type='text' id='pinglun'   class=\"form-control\">" +
+                "                </div>" +
+                "            </div>",
+            btn: btn,
+            yes: function (index, layero) {
+                layer.close(index);
+
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    url: "/fuwu/fuwu/pinglun/" + id + "/" + $("#pinglun").val(),
+
+                    success: function (res) {
+                        if (!res.state) {
+                            layer.msg("不可重复评论")
+                            return;
+                        }
+                        layer.msg("评论成功", {
+                            icon: 1,
+                            time: 500,
+                            shade: [0.1, '#8F8F8F']
+                        }, function () {
+                            location.reload();
+                        });
+
+
+                    }
+                });
+
+
+            }
+        };
+        $.modal.openOptions1(options);
+
+    }
+
+    function shenhe1(id) {
+        var btn = ['<i class="fa fa-check"></i> 审核通过', '<i class="fa fa-close"></i> 取消'];
+        var options = {
+            type: "1",
+            title: "服务审核",
+            width: "700",
+            height: "220",
+            content: "<div class=\"form-group\" id=\"shenheDiv\">" +
+                "                <br>" +
+                "                <label class=\"col-sm-3 control-label\">服务费用：</label>" +
+                "                <div class=\"col-sm-5\">" +
+                "                    <input type=\"email\" id='feiyong'   onkeyup=\"this.value=this.value.replace(/[^0-9.]/g,'')\" required  placeholder=\"只能输入数字,单位/元\" class=\"form-control\">" +
+                "                </div>" +
+                "            </div>",
+            btn: btn,
+            yes: function (index, layero) {
+                layer.close(index);
+                var feiyong = $("#feiyong").val();
+                if (feiyong == null || "" == feiyong) {
+                    alert("请填写费用");
+                    return false;
+                }
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    url: "/fuwu/fuwu/shenhe/" + id + "/" + feiyong,
+
+                    success: function (res) {
+                        if (!res.state) {
+                            layer.msg("不可重复审核")
+                            return;
+                        }
+                        layer.msg("审核成功", {
+                            icon: 1,
+                            time: 500,
+                            shade: [0.1, '#8F8F8F']
+                        }, function () {
+                            location.reload();
+                        });
+
+
+                    }
+                });
+
+
+                $.modal.alert("审核通过");
+
+            }
+        };
+        $.modal.openOptions1(options);
+    }
+
+
+    function jiaofei(id, feiyong) {
+        var btn = ['<i class="fa fa-check"></i> 确定缴费', '<i class="fa fa-close"></i> 取消'];
+        var options = {
+            type: "1",
+            title: "在线缴费",
+            width: "500",
+            height: "220",
+            content: "<div class=\"form-group\" id=\"shenheDiv\">" +
+                "                <br>" +
+                "                <label class=\"col-sm-3 control-label\">费用：</label>" +
+                "                <div class=\"col-sm-5\">" +
+                "                    <input type=\"email\" id='feiyong' value='" + feiyong + "' readonly  onkeyup=\"this.value=this.value.replace(/[^0-9.]/g,'')\" required  placeholder=\"只能输入数字,单位/元\" class=\"form-control\">" +
+                "                </div>" +
+                "            </div>",
+            btn: btn,
+            yes: function (index, layero) {
+                layer.close(index);
+
+                $.ajax({
+                    type: "POST",
+                    contentType: "application/json;charset=UTF-8",
+                    url: "/fuwu/fuwu/jiaofei/" + id,
+
+                    success: function (res) {
+                        if (!res.state) {
+                            layer.msg("不可重复缴费")
+                            return;
+                        }
+                        layer.msg("缴费成功", {
+                            icon: 1,
+                            time: 500,
+                            shade: [0.1, '#8F8F8F']
+                        }, function () {
+                            location.reload();
+                        });
+
+
+                    }
+                });
+
+
+                $.modal.alert("审核通过");
+
+            }
+        };
+        $.modal.openOptions1(options);
+
+    }
+</script>
+</body>
+</html>

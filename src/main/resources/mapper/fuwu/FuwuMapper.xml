@@ -1,0 +1,95 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+"http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ruoyi.fuwu.mapper.FuwuMapper">
+    
+    <resultMap type="Fuwu" id="FuwuResult">
+        <result property="id"    column="id"    />
+        <result property="type"    column="type"    />
+        <result property="name"    column="name"    />
+        <result property="address"    column="address"    />
+        <result property="shenheState"    column="shenhe_state"    />
+        <result property="renshu"    column="renshu"    />
+        <result property="xingji"    column="xingji"    />
+        <result property="pinglun"    column="pinglun"    />
+        <result property="feiyong"    column="feiyong"    />
+        <result property="jiaofeiState"    column="jiaofei_state"    />
+        <result property="chuliState"    column="chuli_state"    />
+    </resultMap>
+
+    <sql id="selectFuwuVo">
+        select id, type, name, address, shenhe_state, renshu, xingji, pinglun, feiyong, jiaofei_state,chuli_state from fuwu
+    </sql>
+
+    <select id="selectFuwuList" parameterType="Fuwu" resultMap="FuwuResult">
+        <include refid="selectFuwuVo"/>
+        <where>  
+            <if test="type != null  and type != ''"> and type = #{type}</if>
+            <if test="name != null  and name != ''"> and name like concat('%', #{name}, '%')</if>
+            <if test="shenheState != null  and shenheState != ''"> and shenhe_state = #{shenheState}</if>
+            <if test="jiaofeiState != null  and jiaofeiState != ''"> and jiaofei_state = #{jiaofeiState}</if>
+            <if test="chuliState != null  and chuliState != ''"> and chuli_state = #{chuliState}</if>
+        </where>
+    </select>
+    
+    <select id="selectFuwuById" parameterType="Long" resultMap="FuwuResult">
+        <include refid="selectFuwuVo"/>
+        where id = #{id}
+    </select>
+        
+    <insert id="insertFuwu" parameterType="Fuwu" useGeneratedKeys="true" keyProperty="id">
+        insert into fuwu
+        <trim prefix="(" suffix=")" suffixOverrides=",">
+            <if test="type != null  and type != ''">type,</if>
+            <if test="name != null  and name != ''">name,</if>
+            <if test="address != null  and address != ''">address,</if>
+            <if test="shenheState != null  and shenheState != ''">shenhe_state,</if>
+            <if test="renshu != null ">renshu,</if>
+            <if test="xingji != null ">xingji,</if>
+            <if test="pinglun != null  and pinglun != ''">pinglun,</if>
+            <if test="feiyong != null ">feiyong,</if>
+            <if test="jiaofeiState != null  and jiaofeiState != ''">jiaofei_state,</if>
+         </trim>
+        <trim prefix="values (" suffix=")" suffixOverrides=",">
+            <if test="type != null  and type != ''">#{type},</if>
+            <if test="name != null  and name != ''">#{name},</if>
+            <if test="address != null  and address != ''">#{address},</if>
+            <if test="shenheState != null  and shenheState != ''">#{shenheState},</if>
+            <if test="renshu != null ">#{renshu},</if>
+            <if test="xingji != null ">#{xingji},</if>
+            <if test="pinglun != null  and pinglun != ''">#{pinglun},</if>
+            <if test="feiyong != null ">#{feiyong},</if>
+            <if test="jiaofeiState != null  and jiaofeiState != ''">#{jiaofeiState},</if>
+         </trim>
+    </insert>
+
+    <update id="updateFuwu" parameterType="Fuwu">
+        update fuwu
+        <trim prefix="SET" suffixOverrides=",">
+            <if test="type != null  and type != ''">type = #{type},</if>
+            <if test="name != null  and name != ''">name = #{name},</if>
+            <if test="address != null  and address != ''">address = #{address},</if>
+            <if test="shenheState != null  and shenheState != ''">shenhe_state = #{shenheState},</if>
+            <if test="renshu != null ">renshu = #{renshu},</if>
+            <if test="xingji != null ">xingji = #{xingji},</if>
+            <if test="pinglun != null  and pinglun != ''">pinglun = #{pinglun},</if>
+            <if test="feiyong != null ">feiyong = #{feiyong},</if>
+            <if test="jiaofeiState != null  and jiaofeiState != ''">jiaofei_state = #{jiaofeiState},</if>
+            <if test="chuliState != null  and chuliState != ''">chuli_state = #{chuliState},</if>
+        </trim>
+        where id = #{id}
+    </update>
+
+    <delete id="deleteFuwuById" parameterType="Long">
+        delete from fuwu where id = #{id}
+    </delete>
+
+    <delete id="deleteFuwuByIds" parameterType="String">
+        delete from fuwu where id in 
+        <foreach item="id" collection="array" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+    </delete>
+    
+</mapper>

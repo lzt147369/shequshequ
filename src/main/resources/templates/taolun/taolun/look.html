@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="zh" xmlns:th="http://www.thymeleaf.org">
+<head>
+  <th:block th:include="include :: header('修改讨论')"/>
+</head>
+<body class="white-bg">
+<div class="wrapper wrapper-content animated fadeInRight ibox-content">
+  <form class="form-horizontal m" id="form-taolun-edit" th:object="${taolun}">
+    <input name="id" th:field="*{id}" id="taolunId" type="hidden">
+
+    <div class="vertical-timeline-content">
+      <h2 th:text="*{title}"></h2>
+      <p th:text="*{content}">
+      </p>
+      <span class="vertical-date">
+        发布时间：<small th:text="${#dates.format(taolun.createTime,'yyyy-MM-dd HH:mm:ss')}"></small>
+      </span><br><br>
+      <span class="vertical-date">
+           <a class="btn btn-white btn-bitbucket" onclick="shoucang()"><i class="fa fa-star"></i>收藏&nbsp;<span
+               id="shoucang">0</span></a>
+
+           <a class="btn btn-white btn-bitbucket" onclick="dianzai()"><i class="fa fa-heart"></i>点赞&nbsp;<span
+               id="dianzan">0</span></a>
+      </span>
+
+      <br><br>
+      <hr>
+
+      <div class="form-group">
+        <label class="col-sm-3 control-label">评论：</label>
+        <div class="col-sm-8">
+          <textarea name="content" id="content" class="form-control"></textarea>
+        </div>
+      </div>
+      <a class="btn btn-success" onclick="tijiao()">提交评论</a>
+      <div id="pinglist">
+
+
+      </div>
+
+
+    </div>
+  </form>
+</div>
+<th:block th:include="include :: footer"/>
+<script type="text/javascript">
+  var prefix = ctx + "taolun/taolun";
+  $("#form-taolun-edit").validate({
+    focusCleanup: true
+  });
+
+  function submitHandler() {
+    if ($.validate.form()) {
+      $.operate.save(prefix + "/edit", $('#form-taolun-edit').serialize());
+    }
+  }
+  function shuaxin(){
+    var id = $("#taolunId").val();
+    $.ajax({
+      type: "POST",
+      contentType: "application/json;charset=UTF-8",
+      url: "/taolun/taolun/" + id,
+      success: function (res) {
+
+        $("#dianzan").html(res.dianzan);
+        $("#shoucang").html(res.shoucang);
+        var html = "";
+        for (var i = 0; i < res.pinglun.length; i++) {
+          html += " <span class=\"vertical-date\">\n"
+              + "        评论者：<small>" + res.pinglun[i].pinglunUserName + "</small><br>评论内容：<small>"
+              + res.pinglun[i].pinglunContent + "</small>\n"
+              + "       </span> <br><br>\n"
+              + "        <hr>";
+        }
+        $("#pinglist").html(html);
+
+      }
+    });
+  }
+
+  $(function () {
+    shuaxin();
+
+  });
+
+
+  function shoucang() {
+    var id = $("#taolunId").val();
+    $.ajax({
+      type: "POST",
+      contentType: "application/json;charset=UTF-8",
+      url: "/taolun/taolun/shoucang/" + id,
+
+      success: function (res) {
+        if (res.state) {
+          $.modal.alertSuccess('收藏成功')
+          shuaxin();
+        } else {
+          $.modal.alertError("不可重复收藏")
+        }
+
+      }
+    });
+
+  }
+
+  function dianzai() {
+    var id = $("#taolunId").val();
+    $.ajax({
+      type: "POST",
+      contentType: "application/json;charset=UTF-8",
+      url: "/taolun/taolun/dianzan/" + id,
+
+      success: function (res) {
+        if (res.state) {
+          $.modal.alertSuccess('点赞成功')
+          shuaxin();
+        } else {
+          $.modal.alertError("不可重复点赞")
+        }
+
+      }
+    });
+
+  }
+
+  function tijiao() {
+    var id = $("#taolunId").val();
+    $.ajax({
+      type: "POST",
+      contentType: "application/json;charset=UTF-8",
+      url: "/taolun/taolun/pinglun/" + id,
+      data: {
+        "content": $("#content").val()
+      },
+      success: function (res) {
+        console.log(res)
+        if (res.state) {
+          $.modal.alertSuccess('评论成功')
+          shuaxin();
+        }
+
+      }
+    });
+  }
+</script>
+</body>
+</html>
